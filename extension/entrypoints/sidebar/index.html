@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>知寻</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./index.ts" type="module"></script>
+</head>
+<body>
+  <div class="sidebar-container">
+    <header class="sidebar-header">
+      <div class="header-content">
+        <h1 class="app-title">知寻</h1>
+        <div class="header-actions"></div>
+      </div>
+      <div class="search-bar">
+        <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+        <input type="text" id="searchInput" placeholder="搜索标注、笔记...">
+      </div>
+      <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="current" title="当前页">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+          </svg>
+        </button>
+        <button class="filter-tab" data-filter="all" title="全部">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M4 14h4v-4H4v4zm0 5h4v-4H4v4zm0-10h4V5H4v4zm5 5h11v-4H9v4zm0 5h11v-4H9v4zm0-10h11V5H9v4z"/>
+          </svg>
+        </button>
+        <button class="filter-tab" data-filter="graph" title="知识图谱">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+          </svg>
+        </button>
+        <button class="filter-tab" data-filter="chat" title="AI 对话">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="sidebar-content">
+      <div id="tagsPanel" class="tags-panel hidden">
+        <div class="tags-header">
+          <span class="tags-title">标签管理</span>
+          <button class="btn-primary btn-small" id="addTagBtn">+ 新建</button>
+        </div>
+        <div id="tagsList" class="tags-list"></div>
+      </div>
+
+      <div id="recordsList" class="records-list"></div>
+
+      <div id="emptyState" class="empty-state hidden">
+        <div class="empty-icon">
+          <svg viewBox="0 0 24 24" width="48" height="48" fill="currentColor">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/>
+          </svg>
+        </div>
+        <p class="empty-text">暂无标注记录</p>
+        <p class="empty-hint">在网页上选中文字即可高亮标注</p>
+      </div>
+
+      <div id="graphPanel" class="graph-panel hidden">
+        <div class="graph-toolbar">
+          <span class="graph-toolbar-title">知识图谱</span>
+          <div style="display:flex;gap:4px;margin-left:auto">
+            <button class="graph-btn" id="graphRefreshBtn" title="刷新图谱">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor">
+              <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+            </svg>
+          </button>
+          <button class="graph-btn" id="graphResetViewBtn" title="重置视图">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12l9-9 9 9"/>
+              <path d="M5 10v10a1 1 0 001 1h3v-7h6v7h3a1 1 0 001-1V10"/>
+            </svg>
+          </button>
+          </div>
+        </div>
+        <div class="graph-wrapper" id="graphWrapper">
+          <canvas id="graphCanvas"></canvas>
+          <div class="graph-tip">标注间通过 [[链接]] 建立关联</div>
+        </div>
+        <div id="graphTooltip" class="graph-tooltip hidden"></div>
+      </div>
+
+      <div id="chatPanel" class="chat-panel hidden">
+        <div class="chat-header">
+          <span class="chat-header-title">💬 AI 对话</span>
+          <div class="chat-header-actions">
+            <button class="chat-history-btn" id="chatHistoryBtn" title="历史记录">⏱</button>
+            <button class="chat-new-btn" id="chatNewBtn" title="新建对话">+ 新建</button>
+          </div>
+        </div>
+        <!-- 历史记录弹窗 -->
+        <div class="chat-history-modal hidden" id="chatHistoryModal">
+          <div class="chat-history-overlay" id="chatHistoryOverlay"></div>
+          <div class="chat-history-panel">
+            <div class="chat-history-header">
+              <span>📋 对话历史</span>
+              <button class="chat-history-close" id="chatHistoryClose">✕</button>
+            </div>
+            <div class="chat-history-list" id="chatHistoryList"></div>
+          </div>
+        </div>
+        <div class="chat-main">
+          <div class="chat-messages" id="chatMessages"></div>
+          <div class="chat-pending-area hidden" id="chatPendingArea">
+            <div class="chat-pending-text" id="chatPendingText"></div>
+            <button class="chat-pending-cancel" id="chatPendingCancel">✕</button>
+          </div>
+          <div class="chat-subtitle-preview hidden" id="chatSubtitlePreview">
+            <span class="chat-subtitle-icon">📝</span>
+            <span class="chat-subtitle-text" id="chatSubtitleText">预览字幕</span>
+          </div>
+          <div class="chat-context-indicator hidden" id="chatContextIndicator">
+            <span class="chat-context-icon">📄</span>
+            <span class="chat-context-text" id="chatContextText"></span>
+          </div>
+          <div class="chat-presets hidden" id="chatPresets">
+            <button class="chat-preset-btn" data-action="summarize">📝 总结</button>
+            <button class="chat-preset-btn" data-action="translate">🌐 翻译</button>
+            <button class="chat-preset-btn" data-action="explain">💡 解释</button>
+          </div>
+          <div class="chat-global-presets hidden" id="chatGlobalPresets">
+            <span class="chat-global-presets-label">快捷操作</span>
+            <div class="chat-global-presets-btns" id="chatGlobalPresetsBtns"></div>
+            <div class="chat-subtitle-hint hidden" id="chatSubtitleHint" title="当前视频页面无法提取字幕信息，总结功能将改为基于页面描述分析">⚠️ 无法提取视频字幕</div>
+          </div>
+          <div class="chat-input-area">
+            <div class="chat-input-wrap">
+              <div class="chat-image-preview" id="chatImagePreview"></div>
+              <textarea class="chat-input" id="chatInput" placeholder="输入你的问题..." rows="1"></textarea>
+              <div class="chat-input-actions">
+                <button class="chat-img-btn" id="chatImgBtn" title="上传图片">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                    <circle cx="8.5" cy="9.5" r="1.5" fill="currentColor"/>
+                    <path d="M3 17l4-4 3 3 4-5 7 7" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                  </svg>
+                </button>
+                <button class="chat-model-btn" id="chatModelBtn" title="切换模型">
+                  <span id="chatModelLabel" class="chat-model-label">模型</span>
+                  <svg viewBox="0 0 24 24" width="10" height="10" fill="currentColor">
+                    <path d="M7 10l5 5 5-5z"/>
+                  </svg>
+                </button>
+                <button class="chat-send-btn" id="chatSendBtn">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                  </svg>
+                </button>
+              </div>
+              <!-- 模型切换下拉菜单 -->
+              <div class="chat-model-dropdown hidden" id="chatModelDropdown">
+                <div class="chat-model-dropdown-list" id="chatModelDropdownList"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-toolbar">
+      <button class="toolbar-btn" id="themeToggleBtn" title="切换主题">
+        <svg id="themeIconLight" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0-.39.39-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0 .39-.39.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41-.39-.39-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/>
+        </svg>
+        <svg id="themeIconDark" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" class="hidden">
+          <path d="M9.37 5.51c-.18.64-.27 1.31-.27 1.99 0 4.08 3.32 7.4 7.4 7.4.68 0 1.35-.09 1.99-.27C17.45 17.19 14.93 19 12 19c-3.86 0-7-3.14-7-7 0-2.93 1.81-5.45 4.37-6.49z"/>
+        </svg>
+      </button>
+      <button class="toolbar-btn" id="defaultColorBtn" title="标注颜色">
+        <svg id="currentColorIcon" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+        </svg>
+      </button>
+      <span class="toolbar-separator"></span>
+      <button class="toolbar-btn" id="importMenuBtn" title="导入">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/>
+        </svg>
+      </button>
+      <button class="toolbar-btn" id="exportMenuBtn" title="导出">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+        </svg>
+      </button>
+      <button class="toolbar-btn" id="syncMenuBtn" title="同步">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+        </svg>
+      </button>
+      <button class="toolbar-btn" id="obsidianExportBtn" title="导出到 Obsidian">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+          <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+        </svg>
+      </button>
+      <button class="toolbar-btn" id="storageManagerBtn" title="存储管理">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <ellipse cx="12" cy="5" rx="9" ry="3"/>
+          <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+          <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+        </svg>
+      </button>
+      <button class="toolbar-btn" id="backendServiceBtn" title="高级服务">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="6" rx="1"/>
+          <rect x="2" y="9" width="20" height="6" rx="1"/>
+          <rect x="2" y="15" width="20" height="6" rx="1"/>
+          <circle cx="5.5" cy="6" r=".8" fill="currentColor" stroke="none"/>
+          <circle cx="5.5" cy="12" r=".8" fill="currentColor" stroke="none"/>
+          <circle cx="5.5" cy="18" r=".8" fill="currentColor" stroke="none"/>
+        </svg>
+      </button>
+    </div>
+    <input type="file" id="importFile" accept=".zip,.json" hidden>
+    <input type="file" id="chatImageInput" accept="image/*" multiple hidden>
+  </div>
+
+  <div id="recordDetailModal" class="modal hidden">
+    <div class="modal-overlay" data-close="true"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>标注详情</h3>
+        <button class="icon-btn modal-close" data-close="true">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-section">
+          <label>高亮文本</label>
+          <div class="highlight-text" id="detailText"></div>
+        </div>
+        <div class="detail-section">
+          <label>笔记</label>
+          <div id="detailMarkdown" class="detail-markdown"></div>
+          <textarea id="detailDescription" class="note-textarea hidden" placeholder="添加笔记..."></textarea>
+        </div>
+        <div class="detail-section">
+          <label>标签</label>
+          <div class="tag-selector" id="detailTags"></div>
+        </div>
+        <div class="detail-section">
+          <label>来源页面</label>
+          <a id="detailUrl" class="detail-url" target="_blank" rel="noopener"></a>
+        </div>
+        <div class="detail-section">
+          <label>创建时间</label>
+          <span id="detailCreatedAt" class="detail-time"></span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-danger" id="deleteRecordBtn">删除</button>
+        <button class="btn-primary" id="editRecordBtn">编辑</button>
+        <button class="btn-primary hidden" id="saveRecordBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tagModal" class="modal hidden">
+    <div class="modal-overlay" data-close-tag="true"></div>
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <h3 id="tagModalTitle">新建标签</h3>
+        <button class="icon-btn modal-close" data-close-tag="true">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-section">
+          <label>标签名称</label>
+          <input type="text" id="tagNameInput" class="text-input" placeholder="输入标签名称">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelTagBtn">取消</button>
+        <button class="btn-primary" id="saveTagBtn">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 默认颜色选择弹窗 -->
+  <div id="colorPickerModal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content modal-small">
+      <div class="modal-header">
+        <h3>默认标注颜色</h3>
+        <button class="icon-btn modal-close" data-close="true">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="color-options-modal" id="defaultColorOptions"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WebDAV 备份配置弹窗 -->
+  <div id="githubStorageModal" class="modal hidden">
+    <div class="modal-overlay" data-close="true"></div>
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h3>同步</h3>
+        <button class="icon-btn modal-close" data-close="true">×</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="detail-section">
+          <label>WebDAV 地址</label>
+          <input type="url" id="webdavUrl" class="text-input" placeholder="例如: https://koofr.datalite.eu/dav/">
+          <p class="hint-text">WebDAV 服务器地址，末尾需要带 /dav/</p>
+        </div>
+
+        <div class="detail-section">
+          <label>用户名</label>
+          <input type="text" id="webdavUsername" class="text-input" placeholder="输入 WebDAV 用户名">
+        </div>
+
+        <div class="detail-section">
+          <label>密码</label>
+          <input type="password" id="webdavPassword" class="text-input" placeholder="输入 WebDAV 密码">
+          <p class="hint-text">密码仅存储在本地浏览器中，不会被发送到其他服务器</p>
+        </div>
+
+        <div class="detail-section">
+          <label>远程目录（可选）</label>
+          <input type="text" id="webdavDir" class="text-input" value="KnowSeek" placeholder="例如: KnowSeek 或留空">
+          <p class="hint-text">备份文件存放的子目录，会自动创建</p>
+        </div>
+
+        <div class="detail-section">
+          <label>远程文件名</label>
+          <input type="text" id="webdavFilename" class="text-input" value="backup.zip" placeholder="备份文件名">
+          <p class="hint-text">备份数据保存的文件名，默认 backup.zip</p>
+        </div>
+
+        <div class="detail-section">
+          <label>前端定时备份</label>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <input type="checkbox" id="backupEnabled">
+              <span style="font-size: 13px;">开启前端定时备份</span>
+            </label>
+          </div>
+          <p class="hint-text" style="margin-top:6px;">⚠️ 前端定时备份依赖浏览器运行，关闭浏览器或电脑休眠后定时任务将停止，且受国内网络限制 WebDAV 同步可能不稳定。如需 24h 不间断、不受网络限制的备份，建议使用「服务器定时备份」。</p>
+        </div>
+
+        <div class="detail-section">
+          <label>首次备份时间</label>
+          <input type="time" id="backupTime" class="text-input" value="03:00">
+          <p class="hint-text">每天在这个时间点执行首次备份，之后每 24 小时执行一次。关掉浏览器后定时任务将失效。</p>
+        </div>
+
+        <!-- 备份状态和日志 -->
+        <div id="backupStatus" class="backup-status hidden"></div>
+        <div id="nextBackupTime" class="backup-next-time hidden" style="text-align:center;font-size:12px;color:#6b7280;padding:4px 0 8px 0;"></div>
+
+        <button id="triggerBackupBtn" class="btn btn-primary btn-full" style="margin-bottom:8px;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle;margin-right:4px;">
+            <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6h-4l3.89 3.89.11-.11L20 12a7.97 7.97 0 0 0-2.35-5.65z"/>
+          </svg>
+          立即备份
+        </button>
+
+        <button id="overwriteLocalBtn" class="btn btn-outline btn-full" style="margin-bottom:12px;">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle;margin-right:4px;">
+            <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+          </svg>
+          覆盖本地
+        </button>
+
+        <div id="backupLogList" class="backup-log-section hidden">
+          <div class="backup-log-header">
+            <span class="backup-log-title">同步日志</span>
+            <button id="backupLogClearBtn" class="btn-text-link">清空日志</button>
+          </div>
+          <div id="backupLogContent" class="backup-log-content"></div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelGithubBtn">取消</button>
+        <button class="btn-primary" id="saveGithubBtn">保存配置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 后端服务配置弹窗 -->
+  <div id="backendServiceModal" class="modal hidden">
+    <div class="modal-overlay" data-close="true"></div>
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h3>高级服务</h3>
+        <button class="icon-btn modal-close" data-close="true">×</button>
+      </div>
+      <div class="modal-body">
+
+        <div class="detail-section">
+          <label>API 密钥</label>
+          <input type="password" id="backendKey" class="text-input" placeholder="输入 API 密钥">
+          <p class="hint-text">用于验证请求身份的密钥</p>
+        </div>
+
+        <div class="detail-section">
+          <button id="testBackendBtn" class="btn btn-primary btn-full" style="margin-bottom:4px;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle;margin-right:4px;">
+              <path d="M16.5 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zM3 7h2v2H3V7zm0 8h2v2H3v-2zm4-4h2v2H7v-2z"/>
+            </svg>
+            测试连接
+          </button>
+          <div id="backendTestResult" class="backend-test-result hidden"></div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="detail-section">
+          <div class="features-label">可用功能</div>
+          <div id="backendFeaturesList" class="features-list">
+            <div class="feature-category">
+              <div class="category-header">
+                <span class="category-icon">🤖</span>
+                <span class="category-name">AI</span>
+                <button class="category-config-btn" id="aiConfigBtn" title="AI 配置">⚙️</button>
+              </div>
+              <div class="category-features">
+                <div class="feature-item disabled" id="chatFeatureItem">
+                  <div class="feature-icon">💬</div>
+                  <div class="feature-info">
+                    <div class="feature-name">智能对话</div>
+                    <div class="feature-desc">与 AI 进行多轮对话</div>
+                  </div>
+                  <div class="feature-status" id="featureChatStatus">未连接</div>
+                </div>
+                <div class="feature-item disabled" id="summaryFeatureItem">
+                  <div class="feature-icon">📄</div>
+                  <div class="feature-info">
+                    <div class="feature-name">内容总结</div>
+                    <div class="feature-desc">总结文章与视频内容</div>
+                  </div>
+                  <div class="feature-status" id="featureSummaryStatus">未连接</div>
+                </div>
+                <div class="feature-item dev" id="asrFeatureItem">
+                  <div class="feature-icon">📝</div>
+                  <div class="feature-info">
+                    <div class="feature-name">音视频转写</div>
+                    <div class="feature-desc">为无字幕视频自动生成字幕</div>
+                  </div>
+                  <div class="feature-status" id="featureAsrStatus">开发中</div>
+                </div>
+                <div class="feature-item dev" id="multimodalFeatureItem">
+                  <div class="feature-icon">🎥</div>
+                  <div class="feature-info">
+                    <div class="feature-name">多模态视频总结</div>
+                    <div class="feature-desc">理解字幕、画面与音频的综合视频总结</div>
+                  </div>
+                  <div class="feature-status" id="featureMultimodalStatus">开发中</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="feature-category">
+              <div class="category-header">
+                <span class="category-icon">📦</span>
+                <span class="category-name">其它</span>
+              </div>
+              <div class="category-features">
+                <div class="feature-item" id="backupScheduleItem">
+                  <div class="feature-icon">⏰</div>
+                  <div class="feature-info">
+                    <div class="feature-name">服务器定时备份</div>
+                  </div>
+                  <label class="feature-switch" style="position:relative;display:inline-block;width:36px;height:20px;flex-shrink:0;">
+                    <input type="checkbox" id="backupToggle" style="opacity:0;width:0;height:0;">
+                    <span class="switch-slider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;border-radius:20px;transition:0.3s;"></span>
+                  </label>
+                </div>
+                <div id="serverBackupConfig" style="padding:0 12px 8px 42px;display:none;">
+                  <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+                    <span style="font-size:12px;color:var(--text-color);white-space:nowrap;">⏰ 备份时间</span>
+                    <input type="time" id="serverBackupTime" value="03:00" style="width:120px;background:var(--bg-input);color:var(--text-color);border:1px solid var(--border-color);border-radius:4px;padding:4px 8px;font-size:12px;font-family:inherit;">
+                    <span style="font-size:12px;color:var(--text-dim);">每天执行</span>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+                    <div id="serverBackupStatusText" style="font-size:11px;color:var(--text-dim);line-height:1.5;flex:1;"></div>
+                    <button id="serverBackupManualBtn" style="background:none;border:none;color:var(--accent-color);font-size:11px;cursor:pointer;padding:2px 4px;white-space:nowrap;">💾 立即备份</button>
+                    <button id="serverRestoreBtn" style="background:none;border:none;color:var(--danger-color,#e74c3c);font-size:11px;cursor:pointer;padding:2px 4px;white-space:nowrap;">🔄 立即覆盖</button>
+                    <button id="serverBackupLogBtn" style="background:none;border:none;color:var(--accent-color);font-size:11px;cursor:pointer;padding:2px 4px;white-space:nowrap;">📋 同步日志</button>
+                  </div>
+                </div>
+                <div class="feature-hint" style="font-size:11px;color:var(--text-dim);padding:0 12px 8px 42px;line-height:1.5;">✅ 服务器始终在线，不受浏览器开关及国内网络限制影响，更稳定可靠。</div>
+              </div>
+            </div>
+
+            <div class="feature-dev-header">正在开发</div>
+            <div class="feature-category">
+              <div class="category-header">
+                <span class="category-icon">🤖</span>
+                <span class="category-name">AI</span>
+              </div>
+              <div class="category-features">
+                <div class="feature-item dev">
+                  <div class="feature-icon">🤖</div>
+                  <div class="feature-info">
+                    <div class="feature-name">AI Agent</div>
+                    <div class="feature-desc">将对话助手升级为可执行任务的 AI 智能体，支持基于知识图谱拓扑结构进行关联分析与推理</div>
+                  </div>
+                  <div class="feature-status">开发中</div>
+                </div>
+                <div class="feature-sub-item">
+                  <div class="feature-icon">🔍</div>
+                  <div class="feature-info">
+                    <div class="feature-name">知识库</div>
+                    <div class="feature-desc">基于 AI 的知识库搜索</div>
+                  </div>
+                  <div class="feature-status">开发中</div>
+                </div>
+              </div>
+            </div>
+            <div class="feature-category">
+              <div class="category-header">
+                <span class="category-icon">📦</span>
+                <span class="category-name">其它</span>
+              </div>
+              <div class="category-features">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelBackendBtn">关闭</button>
+        <button class="btn-primary" id="saveBackendBtn">保存配置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 服务器备份日志弹窗 -->
+  <div id="serverBackupLogModal" class="modal hidden">
+    <div class="modal-overlay" id="serverLogOverlay"></div>
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h3>📋 同步日志</h3>
+        <button class="icon-btn modal-close" id="serverLogCloseBtn">×</button>
+      </div>
+      <div class="modal-body" style="padding:12px 16px;">
+        <div id="serverBackupLogContent" style="max-height:420px;overflow-y:auto;"></div>
+        <div id="serverBackupLogEmpty" style="display:none;text-align:center;padding:60px 0 50px 0;color:var(--text-dim);font-size:14px;">
+          <div style="font-size:32px;margin-bottom:12px;opacity:0.5;">📋</div>
+          <div>暂无备份日志</div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;">
+        <button id="serverBackupLogClearBtn" class="btn-text" style="background:none;border:none;color:var(--danger-color,#e74c3c);font-size:12px;cursor:pointer;padding:4px 8px;">清空全部</button>
+        <button class="btn-secondary" id="cancelServerLogBtn">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AI 配置弹窗 -->
+  <div id="aiConfigModal" class="modal hidden">
+    <div class="modal-overlay" id="aiConfigOverlay"></div>
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h3>AI 智能配置</h3>
+        <button class="icon-btn modal-close" id="aiConfigCloseBtn">×</button>
+      </div>
+      <div class="modal-body">
+
+        <div class="section-divider-label">LLM 配置</div>
+
+        <!-- 已保存的配置列表 -->
+        <div class="detail-section">
+          <label>已保存的配置</label>
+          <div id="providerList" class="provider-list"></div>
+          <button id="addProviderBtn" class="btn-secondary btn-small" style="width:100%;margin-top:6px;padding:6px 0;font-size:13px;border:1px dashed var(--border);background:transparent;cursor:pointer;border-radius:6px;color:var(--text-dim);">+ 添加配置</button>
+        </div>
+
+        <!-- 当前编辑的配置 ID（隐藏） -->
+        <input type="hidden" id="editingProviderId" value="">
+
+        <div class="detail-section">
+          <label>配置名称</label>
+          <input type="text" id="aiLabel" class="text-input" placeholder="例如：我的 DeepSeek、硅基流动">
+        </div>
+
+        <div class="detail-section">
+          <label>LLM 提供商</label>
+          <select id="aiProvider" class="text-input">
+            <option value="deepseek">DeepSeek</option>
+            <option value="openai">OpenAI</option>
+            <option value="siliconflow">SiliconFlow</option>
+            <option value="ollama">Ollama (本地)</option>
+            <option value="custom">自定义</option>
+          </select>
+        </div>
+
+        <div class="detail-section">
+          <label>API Key</label>
+          <input type="password" id="aiApiKey" class="text-input" placeholder="输入 LLM 的 API Key">
+          <p class="hint-text">留空则使用后端默认配置</p>
+        </div>
+
+        <div class="detail-section">
+          <label>自定义 API 地址 (可选)</label>
+          <input type="url" id="aiBaseUrl" class="text-input" placeholder="如 https://api.openai.com/v1">
+          <p class="hint-text">仅自定义提供商需要填写</p>
+        </div>
+
+        <!-- 模型管理 -->
+        <div class="detail-section">
+          <label>该提供商下的模型 <span id="aiModelCount" style="font-size:11px;color:var(--text-dim);"></span></label>
+          <div id="aiModelList" class="model-list"></div>
+          <div class="model-select-row">
+            <select id="aiModelSelect" class="text-input">
+              <option value="">加载中...</option>
+            </select>
+            <button id="refreshModelsBtn" class="icon-btn" title="刷新模型列表">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6h-4l3.89 3.89.11-.11L20 12a7.97 7.97 0 0 0-2.35-5.65z"/>
+              </svg>
+            </button>
+            <button id="addModelBtn" class="btn-secondary btn-small" style="flex-shrink:0;">添加</button>
+          </div>
+          <p class="hint-text">从列表选择模型 → 点击「添加」</p>
+        </div>
+
+        <div class="detail-section">
+          <label>最大输出 Token (max_tokens)</label>
+          <input type="number" id="aiMaxTokens" class="text-input" value="1024" min="256" max="32768" step="256">
+          <p class="hint-text">值越大，AI 回复越长。128K 模型建议 4096~8192，最低 256</p>
+        </div>
+
+        <div class="detail-section">
+          <label>流式输出</label>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <label class="switch" style="position:relative;display:inline-block;width:40px;height:22px;">
+              <input type="checkbox" id="aiStream" checked style="opacity:0;width:0;height:0;">
+              <span class="switch-slider" style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;border-radius:22px;transition:0.3s;"></span>
+            </label>
+            <span id="aiStreamLabel" style="font-size:13px;color:var(--text-secondary)">已开启</span>
+          </div>
+          <p class="hint-text">开启后 AI 回复将逐字显示，体验更流畅</p>
+        </div>
+
+        <div class="detail-section" style="margin-top:12px;">
+          <button id="testAiBtn" class="btn btn-primary btn-full" style="margin-bottom:4px;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle;margin-right:4px;">
+              <path d="M16.5 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zM3 7h2v2H3V7zm0 8h2v2H3v-2zm4-4h2v2H7v-2z"/>
+            </svg>
+            测试 LLM 连接
+          </button>
+          <div id="aiTestResult" class="backend-test-result hidden"></div>
+        </div>
+
+        <div class="section-divider-label">Embedding 向量嵌入</div>
+
+        <div class="detail-section">
+          <label>Embedding 提供商</label>
+          <select id="aiEmbeddingProvider" class="text-input">
+            <option value="siliconflow">SiliconFlow</option>
+            <option value="openai">OpenAI</option>
+            <option value="deepseek">DeepSeek</option>
+            <option value="ollama">Ollama (本地)</option>
+            <option value="custom">自定义</option>
+          </select>
+        </div>
+
+        <div class="detail-section" id="embeddingLabelSection" style="display:none;">
+          <label>配置名称</label>
+          <input type="text" id="aiEmbeddingLabel" class="text-input" placeholder="例如：我的本地嵌入、自定义向量">
+          <p class="hint-text">给这个自定义 Embedding 提供商取个名字</p>
+        </div>
+
+        <div class="detail-section">
+          <label>Embedding API Key</label>
+          <input type="password" id="aiEmbeddingApiKey" class="text-input" placeholder="输入 Embedding 服务的 API Key">
+          <p class="hint-text">独立于 LLM 的 API Key，必须填写</p>
+        </div>
+
+        <div class="detail-section" id="embeddingBaseUrlSection" style="display:none;">
+          <label>Embedding API 地址</label>
+          <input type="url" id="aiEmbeddingBaseUrl" class="text-input" placeholder="如 https://api.siliconflow.cn/v1">
+          <p class="hint-text">自定义提供商需要填写 API 地址</p>
+        </div>
+
+        <div class="detail-section">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px;">
+            <label style="margin:0;flex:1;">Embedding 模型</label>
+            <button id="refreshEmbeddingModelsBtn" class="icon-btn" title="刷新模型列表">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6h-4l3.89 3.89.11-.11L20 12a7.97 7.97 0 0 0-2.35-5.65z"/>
+              </svg>
+            </button>
+          </div>
+          <select id="aiEmbeddingModel" class="text-input">
+            <option value="">加载中...</option>
+          </select>
+          <p class="hint-text">用于内容变更的语义相似度检测。留空则跳过语义检测。</p>
+          <button id="testEmbeddingBtn" class="btn btn-primary btn-full" style="margin-top:8px;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle;margin-right:4px;">
+              <path d="M16.5 6c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zM3 7h2v2H3V7zm0 8h2v2H3v-2zm4-4h2v2H7v-2z"/>
+            </svg>
+            测试 Embedding 连接
+          </button>
+          <div id="embeddingTestResult" class="backend-test-result hidden"></div>
+        </div>
+
+        <div class="section-divider-label">ASR 语音识别</div>
+
+        <!-- ASR 语音识别配置 -->
+        <div class="detail-section">
+          <label>ASR 引擎</label>
+          <select id="asrEngine" class="text-input">
+            <option value="whisper">Whisper (本地)</option>
+            <option value="bailian">阿里云百炼 (在线)</option>
+          </select>
+          <p class="hint-text">开启后，视频总结将使用语音识别生成字幕，替代 B 站自带字幕</p>
+        </div>
+
+        <div class="detail-section" id="asrModelSection">
+          <div class="model-select-row">
+            <label style="flex:1;">ASR 模型</label>
+            <button id="refreshAsrModelsBtn" class="icon-btn" title="刷新模型列表">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M17.65 6.35A7.96 7.96 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6h-4l3.89 3.89.11-.11L20 12a7.97 7.97 0 0 0-2.35-5.65z"/>
+              </svg>
+            </button>
+          </div>
+          <select id="asrModel" class="text-input">
+            <option value="">加载中...</option>
+          </select>
+          <div id="asrModelInfo" class="hint-text"></div>
+        </div>
+
+        <div class="detail-section hidden" id="asrCacheSection">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span id="asrCacheLabel" class="hint-text" style="margin:0;">📦 缓存信息</span>
+            <button id="manageAsrCacheBtn" class="btn-secondary btn-small">管理</button>
+          </div>
+        </div>
+
+        <div class="detail-section hidden" id="asrApiKeySection">
+          <label>API Key</label>
+          <input type="password" id="asrApiKey" class="text-input" placeholder="输入 API Key">
+          <p class="hint-text">阿里云百炼: dashscope.aliyuncs.com</p>
+        </div>
+
+        <div class="detail-section" style="margin-top:12px;">
+          <button id="testAsrBtn" class="btn btn-primary btn-full" style="margin-bottom:4px;">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" style="vertical-align:middle;margin-right:4px;">
+              <path d="M12 3C6.486 3 2 6.486 2 12s4.486 9 10 9 10-4.486 10-9-4.486-9-10-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7zM13 7h-2v6h2V7zm0 8h-2v2h2v-2z"/>
+            </svg>
+            测试 ASR 连接
+          </button>
+          <div id="asrTestResult" class="backend-test-result hidden"></div>
+        </div>
+
+        <style>
+          .switch .switch-slider { background-color: #ccc; }
+          .switch input:checked + .switch-slider { background-color: #10b981; }
+          .switch input:checked + .switch-slider::before { transform: translateX(18px); }
+          .switch .switch-slider::before {
+            content: ""; position: absolute; height: 18px; width: 18px; left: 2px; bottom: 2px;
+            background-color: white; border-radius: 50%; transition: 0.3s;
+          }
+          .provider-list { display:flex;flex-direction:column;gap:4px;max-height:180px;overflow-y:auto; }
+          .provider-item {
+            display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;
+            cursor:pointer;border:1px solid var(--border);transition:all 0.15s;
+          }
+          .provider-item:hover { background:var(--bg-hover); }
+          .provider-item.active { border-color:var(--accent);background:var(--accent-bg); }
+          .provider-item .provider-name { flex:1;font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
+          .provider-item .provider-model { font-size:11px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px; }
+          .provider-item .provider-check { width:16px;height:16px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center; }
+          .provider-item.active .provider-check { border-color:var(--accent);background:var(--accent); }
+          .provider-item.active .provider-check::after { content:"";width:6px;height:6px;border-radius:50%;background:white; }
+          .provider-item .provider-del {
+            opacity:0;width:20px;height:20px;border:none;background:transparent;
+            cursor:pointer;border-radius:4px;color:var(--text-dim);font-size:14px;line-height:1;
+            display:flex;align-items:center;justify-content:center;flex-shrink:0;
+          }
+          .provider-item:hover .provider-del { opacity:0.6; }
+          .provider-item .provider-del:hover { opacity:1;color:var(--danger);background:var(--danger-bg); }
+        </style>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="cancelAiConfigBtn">取消</button>
+        <button class="btn-primary" id="saveAiConfigBtn">保存配置</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ASR 缓存管理弹窗（独立于 AI 配置弹窗，避免 fixed 裁剪） -->
+  <div id="asrCacheModal" class="modal hidden">
+    <div class="modal-overlay" id="asrCacheOverlay"></div>
+    <div class="modal-content modal-small" style="max-width:360px;">
+      <div class="modal-header">
+        <h3 style="font-size:15px;">本地模型缓存</h3>
+        <button class="icon-btn modal-close" id="closeAsrCacheBtn">✕</button>
+      </div>
+      <div class="modal-body" style="min-height:80px;">
+        <div id="asrCacheContent" style="font-size:13px;">
+          <p style="color:var(--text-dim);">加载中...</p>
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex;gap:8px;justify-content:flex-end;">
+        <button id="refreshAsrCacheBtn" class="btn-secondary btn-small">🔄 刷新</button>
+        <button id="clearAllAsrCacheBtn" class="btn-secondary btn-small" style="color:var(--danger, #e74c3c);">🧹 清空全部</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 思维导图弹窗 -->
+  <div class="mindmap-modal hidden" id="mindmapModal">
+    <div class="mindmap-modal-overlay" id="mindmapModalOverlay"></div>
+    <div class="mindmap-modal-content">
+      <div class="mindmap-modal-header">
+        <span class="mindmap-modal-title">🧠 思维导图</span>
+        <button class="mindmap-modal-close" id="mindmapModalClose">&times;</button>
+      </div>
+      <div class="mindmap-modal-body" id="mindmapModalBody">
+        <svg class="mindmap-svg" id="mindmapSvg"></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- 存储管理弹窗 -->
+  <div id="storageModal" class="modal hidden">
+    <div class="modal-overlay" data-storage-close="true"></div>
+    <div class="modal-content modal-medium">
+      <div class="modal-header">
+        <h3>💾 存储管理</h3>
+        <button class="icon-btn modal-close" data-storage-close="true">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="sm-section">
+          <div class="sm-section-title">总存储用量</div>
+          <div class="sm-bar">
+            <div class="sm-bar-fill" id="storageTotalFill" style="width: 0%"></div>
+          </div>
+          <div class="sm-bar-text" id="storageTotalText">计算中...</div>
+        </div>
+
+        <div class="sm-divider"></div>
+
+        <div class="sm-section">
+          <div class="sm-section-title">存储详情</div>
+          <div class="sm-list">
+            <div class="sm-item">
+              <div class="sm-item-name">扩展存储</div>
+              <div class="sm-item-desc">标注·标签·配置</div>
+              <div class="sm-item-value" id="storageChromeStorage">-</div>
+            </div>
+            <div class="sm-item">
+              <div class="sm-item-name">网页快照</div>
+              <div class="sm-item-desc">IndexedDB</div>
+              <div class="sm-item-value" id="storageIndexedDB">-</div>
+            </div>
+            <div class="sm-item">
+              <div class="sm-item-name">截图文件</div>
+              <div class="sm-item-desc">OPFS</div>
+              <div class="sm-item-value" id="storageOPFS">-</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sm-divider"></div>
+
+        <div class="sm-section">
+          <div class="sm-section-title">统计数据</div>
+          <div class="sm-stats">
+            <div class="sm-stat">
+              <div class="sm-stat-num" id="storageSnapshotCount">-</div>
+              <div class="sm-stat-label">快照</div>
+            </div>
+            <div class="sm-stat">
+              <div class="sm-stat-num" id="storageScreenshotCount">-</div>
+              <div class="sm-stat-label">截图</div>
+            </div>
+            <div class="sm-stat">
+              <div class="sm-stat-num" id="storageRecordCount">-</div>
+              <div class="sm-stat-label">标注</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sm-divider"></div>
+
+        <div class="sm-section">
+          <div class="sm-section-title">数据管理</div>
+          <div class="sm-clear-row">
+            <button class="sm-btn" data-clear="chrome">清除标注记录</button>
+            <button class="sm-btn" data-clear="snapshots">清除快照</button>
+            <button class="sm-btn" data-clear="screenshots">清除截图</button>
+          </div>
+          <button class="sm-btn sm-btn-danger" data-clear="all">清除所有数据</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

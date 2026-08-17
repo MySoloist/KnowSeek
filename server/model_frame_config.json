@@ -1,0 +1,14 @@
+{
+  "description": "视频总结帧策略配置：根据模型名关键词匹配，决定最大独立帧数。超出则打包为 3×3 网格图。",
+  "rules": [
+    {"pattern": "gemini",  "max_individual": 60, "note": "Gemini 系列：超大上下文 1M-2M"},
+    {"pattern": "claude",  "max_individual": 35, "note": "Claude 3/3.5 系列：200k 上下文"},
+    {"pattern": "gpt-4o", "max_individual": 35, "note": "GPT-4o 系列：128k 上下文 + 高效图编码"},
+    {"pattern": "gpt-4-vision", "max_individual": 35, "note": "GPT-4 Vision"},
+    {"pattern": "qwen.*vl", "max_individual": 25, "note": "Qwen VL 系列：约 3k-4k tokens/图"},
+    {"pattern": "glm-4v", "max_individual": 20, "note": "智谱 GLM-4V"},
+    {"pattern": "step.*vl", "max_individual": 20, "note": "阶跃星辰 Step VL"},
+    {"pattern": "minicpm", "max_individual": 18, "note": "MiniCPM-V 系列：小模型"}
+  ],
+  "default": 15
+}

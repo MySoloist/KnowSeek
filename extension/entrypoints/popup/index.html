@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>知寻</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./index.ts" type="module"></script>
+</head>
+<body>
+  <div class="container">
+    <!-- 品牌头部 -->
+    <div class="header">
+      <div class="header-left">
+        <div class="header-icon">
+          <img src="/icons/icon128.png" alt="">
+        </div>
+        <span class="header-title">知寻</span>
+      </div>
+      <div class="header-right">
+        <span class="header-badge">v1.0</span>
+        <a class="header-github" href="https://github.com/MySoloist" target="_blank" title="在 GitHub 上查看">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="stats-card">
+      <div class="stats-row">
+        <div class="stat-block" id="statAnnotations">
+          <span class="stat-value">0</span>
+          <span class="stat-label">条标注</span>
+        </div>
+        <div class="stat-block" id="statPages">
+          <span class="stat-value">0</span>
+          <span class="stat-label">个页面</span>
+        </div>
+        <div class="stat-block" id="statSites">
+          <span class="stat-value">0</span>
+          <span class="stat-label">个网站</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 标签切换 -->
+    <div class="tab-bar" id="tabBar">
+      <button class="tab-btn active" data-tab="pages">📄 最近</button>
+      <button class="tab-btn" data-tab="subscription">📡 动态</button>
+      <button class="tab-btn" data-tab="notification">
+        <span class="notif-tab-btn-content">
+          🔔 变更
+          <span class="notif-tab-badge hidden" id="notifTabBadge">0</span>
+        </span>
+      </button>
+    </div>
+    <div class="tab-content" id="tabContent">
+      <!-- 由 JS 动态渲染 -->
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="cta">
+      <button class="cta-btn" id="openSidebarBtn">
+        <span>打开侧边栏</span>
+        <svg class="cta-arrow" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- 品牌标语 -->
+    <div class="footer-brand">
+      <svg class="brand-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2l1.2 3.6a3.5 3.5 0 0 0 2.2 2.2L19 9l-3.6 1.2a3.5 3.5 0 0 0-2.2 2.2L12 16l-1.2-3.6a3.5 3.5 0 0 0-2.2-2.2L5 9l3.6-1.2a3.5 3.5 0 0 0 2.2-2.2L12 2z"/>
+      </svg>
+      <span>知寻 · 让知识触手可及</span>
+      <svg class="brand-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2l1.2 3.6a3.5 3.5 0 0 0 2.2 2.2L19 9l-3.6 1.2a3.5 3.5 0 0 0-2.2 2.2L12 16l-1.2-3.6a3.5 3.5 0 0 0-2.2-2.2L5 9l3.6-1.2a3.5 3.5 0 0 0 2.2-2.2L12 2z"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- 变更详情弹窗 -->
+  <div id="changeDetailModal" class="notif-overlay hidden">
+    <div class="notif-overlay-scroll">
+      <div class="notif-overlay-card">
+        <div class="notif-overlay-header">
+          <h3 class="change-detail-title">🔄 标题</h3>
+          <button class="notif-overlay-close" data-cd-close="true">&times;</button>
+        </div>
+        <div class="notif-overlay-body">
+          <div class="change-detail-summary"></div>
+          <div class="change-detail-content"></div>
+        </div>
+        <div class="notif-overlay-footer">
+          <button class="btn-danger" id="changeDetailIgnoreBtn">忽略</button>
+          <button class="btn-secondary" id="changeDetailCompareBtn">详情</button>
+          <button class="btn-primary" id="changeDetailSaveBtn">保存更新</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 左右对比弹窗 -->
+  <div id="diffCompareModal" class="notif-overlay hidden">
+    <div class="notif-overlay-scroll">
+      <div class="notif-overlay-card notif-overlay-card--wide">
+        <div class="notif-overlay-header">
+          <h3 id="diffCompareTitle">📑 新旧内容对比</h3>
+          <button class="notif-overlay-close" data-diff-close="true">&times;</button>
+        </div>
+        <div class="notif-overlay-body">
+          <div class="diff-compare-container">
+            <div class="diff-compare-pane">
+              <div class="diff-compare-pane-header diff-pane-old">旧版本</div>
+              <div class="diff-compare-pane-content" id="diffCompareOld"></div>
+            </div>
+            <div class="diff-compare-divider"></div>
+            <div class="diff-compare-pane">
+              <div class="diff-compare-pane-header diff-pane-new">新版本</div>
+              <div class="diff-compare-pane-content" id="diffCompareNew"></div>
+            </div>
+          </div>
+        </div>
+        <div class="notif-overlay-footer">
+          <button class="btn-primary" data-diff-close="true">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

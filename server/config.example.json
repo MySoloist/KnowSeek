@@ -1,0 +1,12 @@
+{
+  "provider": "custom",
+  "api_key": "your-api-key",
+  "model": "Qwen/Qwen3-VL-8B-Instruct",
+  "max_tokens": 7680,
+  "base_url": "https://api-inference.modelscope.cn/v1",
+  "stream": true,
+  "embedding_model": "",
+  "embedding_provider": "",
+  "embedding_api_key": "",
+  "embedding_base_url": null
+}

@@ -1,0 +1,35 @@
+{
+  "name": "wxt-starter",
+  "description": "manifest.json description",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wxt",
+    "dev:firefox": "wxt -b firefox",
+    "build": "wxt build",
+    "build:firefox": "wxt build -b firefox",
+    "zip": "wxt zip",
+    "zip:firefox": "wxt zip -b firefox",
+    "compile": "tsc --noEmit",
+    "postinstall": "wxt prepare"
+  },
+  "devDependencies": {
+    "terser": "^5.48.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10",
+    "wxt": "^0.20.27"
+  },
+  "dependencies": {
+    "@mozilla/readability": "^0.6.0",
+    "diff": "^9.0.0",
+    "jszip": "^3.10.1",
+    "katex": "^0.17.0",
+    "marked": "^18.0.5",
+    "marked-katex-extension": "^5.1.10",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "turndown": "^7.2.4",
+    "zustand": "^5.0.14"
+  }
+}

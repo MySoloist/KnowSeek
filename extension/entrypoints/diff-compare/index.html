@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新旧内容对比 - 知寻</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./index.ts" type="module"></script>
+</head>
+<body>
+  <div class="dc-container">
+    <!-- 顶部导航 -->
+    <header class="dc-header">
+      <div class="dc-header-left">
+        <button class="dc-back-btn" id="dcBackBtn" title="返回">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 12H5"/><path d="m12 19-7-7 7-7"/>
+          </svg>
+        </button>
+        <h1 class="dc-title" id="dcTitle">新旧内容对比</h1>
+      </div>
+      <div class="dc-header-right">
+        <span class="dc-badge dc-badge-added" id="dcBadgeAdded">✚ 0</span>
+        <span class="dc-badge dc-badge-modified" id="dcBadgeModified">➜ 0</span>
+        <span class="dc-badge dc-badge-removed" id="dcBadgeRemoved">✕ 0</span>
+      </div>
+    </header>
+
+    <!-- 工具栏 -->
+    <div class="dc-toolbar">
+      <div class="dc-toolbar-left">
+        <div class="dc-toolbar-label">对比模式：</div>
+        <button class="dc-mode-btn active" data-mode="semantic" id="dcModeSemantic">🔗 语义匹配</button>
+        <button class="dc-mode-btn" data-mode="text" id="dcModeText">📝 文本对比</button>
+      </div>
+      <div class="dc-toolbar-right">
+        <button class="dc-reload-btn" id="dcReloadBtn" title="重新分析">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+          </svg>
+          重新分析
+        </button>
+      </div>
+    </div>
+
+    <!-- 对比内容区 -->
+    <div class="dc-compare">
+      <div class="dc-pane dc-pane-old">
+        <div class="dc-pane-header">
+          <span class="dc-pane-label">旧版本</span>
+          <span class="dc-pane-count" id="dcOldCount">0 个段落</span>
+        </div>
+        <div class="dc-pane-content" id="dcOldContent">
+          <div class="dc-loading">加载中...</div>
+        </div>
+      </div>
+      <div class="dc-divider" id="dcDivider">
+        <div class="dc-divider-handle"></div>
+      </div>
+      <div class="dc-pane dc-pane-new">
+        <div class="dc-pane-header">
+          <span class="dc-pane-label">新版本</span>
+          <span class="dc-pane-count" id="dcNewCount">0 个段落</span>
+        </div>
+        <div class="dc-pane-content" id="dcNewContent">
+          <div class="dc-loading">加载中...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 错误提示 -->
+  <div id="dcErrorToast" class="dc-toast hidden"></div>
+</body>
+</html>
