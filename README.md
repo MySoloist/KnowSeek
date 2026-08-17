@@ -37,6 +37,30 @@ KnowSeek/
 ├── server/      # 后端服务（FastAPI + ChromaDB + litellm）
 └── docs/        # 文档
 ```
+## 技术栈
+
+| 端 | 技术 |
+|----|------|
+| 扩展 | TypeScript, React 19, WXT, Vite, Zustand, IndexedDB |
+| 后端 | Python, FastAPI, Uvicorn, ChromaDB, litellm |
+| AI 能力 | 多 LLM 统一接入（litellm）、向量检索（ChromaDB）、Whisper 语音识别 |
+| 内容处理 | Readability 正文提取、yt-dlp 视频下载、ffmpeg 视频处理 |
+
+## 环境要求
+
+本项目在以下环境中开发与验证通过：
+
+| 类别 | 版本 |
+|------|------|
+| 操作系统 | Windows 11（Windows 10 / macOS / Linux 亦可运行） |
+| Node.js | ≥ 18（WXT / React 19 要求；验证版本 v24.14.1） |
+| npm | 随 Node.js 安装（验证版本 11.11.0） |
+| Python | 3.10+（验证版本 3.11.9） |
+| ffmpeg | 全量构建版（验证版本 2025-12-31 full build），需加入 PATH |
+| yt-dlp | 2026.7.4（随后端 `pip install` 自动安装，无需单独配置） |
+| 浏览器 | Chrome / Edge 等 Chromium 内核浏览器（验证版本 Chrome 151） |
+
+> ffmpeg 仅「视频智能总结」的帧抽取功能需要；未安装时该项功能不可用，不影响其余功能。
 
 ## 快速开始
 
@@ -97,15 +121,6 @@ npm run build   # 生产构建，产物在 .output/chrome-mv3/
 
 
 > 修改扩展代码后需重新 `npm run build`，并在 `chrome://extensions` 点击扩展卡片上的刷新按钮，再打开 popup/侧边栏生效。
-
-## 技术栈
-
-| 端 | 技术 |
-|----|------|
-| 扩展 | TypeScript, React 19, WXT, Vite, Zustand, IndexedDB |
-| 后端 | Python, FastAPI, Uvicorn, ChromaDB, litellm |
-| AI 能力 | 多 LLM 统一接入（litellm）、向量检索（ChromaDB）、Whisper 语音识别 |
-| 内容处理 | Readability 正文提取、yt-dlp 视频下载、ffmpeg 视频处理 |
 
 ## 开源许可
 
